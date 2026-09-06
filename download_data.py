@@ -16,7 +16,6 @@ Uso:
 """
 
 import os
-import shutil
 
 import kagglehub
 
@@ -89,11 +88,17 @@ def main():
     os.makedirs(TARGET_DIR, exist_ok=True)
     for split_name, src in found.items():
         dst = os.path.join(TARGET_DIR, split_name)
-        if os.path.exists(dst):
-            print(f"\n'{dst}' já existe — pulando cópia.")
+        if os.path.lexists(dst):
+            print(f"\n'{dst}' já existe — pulando.")
             continue
-        print(f"\nCopiando {src} -> {dst} ...")
-        shutil.copytree(src, dst)
+        # Usamos link simbólico em vez de copiar fisicamente os arquivos.
+        # Como o kagglehub já mantém o dataset em cache num diretório
+        # próprio, copiar ~140k arquivos de imagem para ./data/ seria
+        # lento e desperdiçaria espaço em disco à toa. O link simbólico
+        # faz ./data/train "apontar" direto para a pasta já baixada,
+        # e bibliotecas como ImageFolder leem através dele normalmente.
+        print(f"\nCriando link simbólico: {dst} -> {src}")
+        os.symlink(os.path.abspath(src), dst, target_is_directory=True)
 
     print(f"\n✅ Pronto. Estrutura final em '{TARGET_DIR}':")
     print_tree(TARGET_DIR, max_depth=2)
