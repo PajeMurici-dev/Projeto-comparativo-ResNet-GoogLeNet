@@ -16,7 +16,7 @@ import json
 import os
 
 import config
-from reporting import plot_training_curves, print_comparison_table
+from reporting import plot_training_curves, plot_epoch_times, plot_loss_curves, plot_final_metrics_bar, print_comparison_table
 
 
 def load_results(model_name: str):
@@ -41,6 +41,9 @@ def main():
         f.write(table_str)
 
     plot_training_curves(all_results, os.path.join(config.RESULTS_DIR, "val_accuracy_comparison.png"))
+    plot_epoch_times(all_results, os.path.join(config.RESULTS_DIR, "epoch_time_comparison.png"))
+    plot_loss_curves(all_results, os.path.join(config.RESULTS_DIR, "loss_curves_comparison.png"))
+    plot_final_metrics_bar(all_results, os.path.join(config.RESULTS_DIR, "final_metrics_bar.png"))
 
     with open(os.path.join(config.RESULTS_DIR, "all_results.json"), "w", encoding="utf-8") as f:
         json.dump(all_results, f, indent=2, ensure_ascii=False)
